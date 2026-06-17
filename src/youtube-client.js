@@ -29,15 +29,25 @@ function oauthClient(redirectUri) {
   return new google.auth.OAuth2(clientId, clientSecret, redirectUri);
 }
 
-/** Authenticated youtube v3 client. Throws (caller reports) if any credential is missing. */
-function authedYouTube() {
+/** Authed OAuth2 client (refresh-token grant). Throws if any credential is missing. */
+function authedOAuth2() {
   const {clientId, clientSecret, refreshToken} = getCreds();
   if (!clientId || !clientSecret || !refreshToken) {
     throw new Error("Missing YouTube OAuth credentials — run: npm run auth:youtube");
   }
   const oauth2 = new google.auth.OAuth2(clientId, clientSecret);
   oauth2.setCredentials({refresh_token: refreshToken});
-  return google.youtube({version: "v3", auth: oauth2});
+  return oauth2;
 }
 
-module.exports = {ROOT, SCOPES, getCreds, oauthClient, authedYouTube};
+/** Authenticated YouTube Data API v3 client. */
+function authedYouTube() {
+  return google.youtube({version: "v3", auth: authedOAuth2()});
+}
+
+/** Authenticated YouTube Analytics API v2 client (same OAuth credentials). */
+function authedAnalytics() {
+  return google.youtubeAnalytics({version: "v2", auth: authedOAuth2()});
+}
+
+module.exports = {ROOT, SCOPES, getCreds, oauthClient, authedOAuth2, authedYouTube, authedAnalytics};

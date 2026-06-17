@@ -11,6 +11,7 @@
     "generate:script": "node src/generate-script.js",
     "pipeline": "node src/pipeline.js",
     "cron:daily": "node src/cron-runner.js",
+    "check:performance": "node src/performance-runner.js",
     "auth:youtube": "node src/auth-youtube.js",
     "publish": "node src/publish-video.js",
     "reject": "node src/reject-video.js"

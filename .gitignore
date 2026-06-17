@@ -13,6 +13,7 @@ cron-state.json
 manifest.json
 cron-error.log
 performance-report.json
+out/performance-report.json
 .render-public/
 out/preview.mp4
 
