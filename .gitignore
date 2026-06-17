@@ -10,3 +10,8 @@ cron-state.json
 manifest.json
 cron-error.log
 performance-report.json
+.render-public/
+out/preview.mp4
+
+# committed royalty-free music asset (exception to the *.mp3 ignore above)
+!src/assets/music/background.mp3
