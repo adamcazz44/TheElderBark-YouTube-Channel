@@ -1,0 +1,36 @@
+"use strict";
+// 30-theme launch rotation for The Elder Bark — senior-dog comedy, written from the
+// old dog's first-person POV. Each theme doubles as the footage search hint
+// (render-video.js matches clips by keyword overlap with the theme words).
+module.exports = [
+  "selective hearing in old age",
+  "the majestic gray muzzle",
+  "stairs are now my mortal enemy",
+  "napping is my full-time job",
+  "the slow-motion morning stretch",
+  "ignoring the vet-approved diet",
+  "barking at things that aren't there",
+  "claiming the best spot on the couch",
+  "the senior dog speed limit",
+  "mysteriously deaf at bath time",
+  "i've earned the right to be grumpy",
+  "the strategic afternoon nap",
+  "still convinced i'm a puppy",
+  "judging the new puppy in my house",
+  "the long sigh of a tired old dog",
+  "refusing to walk past my favorite tree",
+  "distinguished gentleman of the dog park",
+  "running this household at thirteen",
+  "selective memory about the rules",
+  "the dignified refusal to fetch",
+  "guarding my sunbeam all day",
+  "loud opinions from an old dog",
+  "stiff joints, enormous attitude",
+  "the senior snack negotiation",
+  "supervising dinner from the kitchen floor",
+  "the slow tail wag of approval",
+  "too old for your nonsense",
+  "the wise elder of the backyard",
+  "professional couch occupant",
+  "still the boss after all these years",
+];

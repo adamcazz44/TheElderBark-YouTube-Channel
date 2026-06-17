@@ -1,0 +1,44 @@
+# dependencies
+node_modules/
+
+# generated / downloaded assets (keep the folder, ignore the contents)
+output/*
+footage/*
+music/*
+!output/.gitkeep
+!footage/.gitkeep
+!music/.gitkeep
+# track the render manifest (but never the rendered .mp4s)
+!output/manifest.json
+# music tracks are never committed (only the .gitkeep above)
+music/*.mp3
+music/*.wav
+
+# ephemeral render props + lean per-render public dir handed to the Remotion CLI
+.render-props.json
+.render-public/
+
+# thumbnails — keep only the manifest (+ .gitkeep), never the images
+thumbnails/*.png
+thumbnails/*.jpg
+
+# temp scratch (frame extraction etc.)
+temp/
+
+# machine-local cron state + error log (Spec 6)
+scripts/cron-state.json
+scripts/cron-error.log
+# track the footage manifest (but never the .mp4 clips themselves)
+!footage/manifest.json
+
+# generated quote JSON (keep only the manifest)
+quotes/*.json
+quotes/*.error
+!quotes/manifest.json
+
+# secrets
+.env
+
+# OS
+Thumbs.db
+.DS_Store
