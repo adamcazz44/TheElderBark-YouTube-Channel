@@ -118,14 +118,25 @@ function selectClips(allClips, theme) {
 }
 
 /**
- * Trim the caption pool to a Short of ~target seconds without exceeding hardMax. Walks the
- * captions in order, accumulating until close to target; skips any single caption that would
- * blow the ceiling (a shorter later one may still fit). Always returns at least one caption.
+ * Trim the caption pool to a Short of ~target seconds without exceeding hardMax. Leads with a
+ * punchy "short" caption as the first-3-seconds hook (if the pool has one), then walks the rest
+ * in order, accumulating until close to target; skips any single caption that would blow the
+ * ceiling (a shorter later one may still fit). Always returns at least one caption.
  */
 function selectPhrasesForTarget(allPhrases, target, hardMax) {
+  // Hook first: move the earliest usable "short" caption to the front so the Short opens on a
+  // quick one-liner. If there's no short caption, keep the pool's original order.
+  const leadIdx = allPhrases.findIndex(
+    (p) => p.style === "short" && (Number(p.screen_duration_seconds) || 0) > 0
+  );
+  const ordered =
+    leadIdx > 0
+      ? [allPhrases[leadIdx], ...allPhrases.slice(0, leadIdx), ...allPhrases.slice(leadIdx + 1)]
+      : allPhrases;
+
   const picked = [];
   let total = 0;
-  for (const p of allPhrases) {
+  for (const p of ordered) {
     const d = Number(p.screen_duration_seconds) || 0;
     if (d <= 0) continue;
     if (total + d > hardMax) continue; // would blow the ceiling — skip, try a shorter one
