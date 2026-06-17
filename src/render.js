@@ -1,14 +1,15 @@
 "use strict";
 /**
- * render.js — Spec 4: headless renderer for the ElderBarkShort composition.
+ * render.js — headless renderer for the ElderBarkShort composition.
  *
  *   npm run render  -- --props '{"imagePath":"out/images/x.png","captions":["..."]}'
  *   npm run preview                       # renders frames 0-150 (~5s) to out/preview.mp4
  *
- * Remotion serves assets from a "public dir", not from arbitrary paths, so we stage a lean
- * per-render public dir containing just the chosen image + the committed background.mp3, bundle
- * against it, and the composition resolves both via staticFile(). (Mirrors the pexels-pipeline
- * lean-public-dir pattern, adapted to a single still.)
+ * Exports renderShort() so the pipeline (Spec 5) can render in-process instead of shelling out.
+ *
+ * Remotion serves assets from a "public dir", not arbitrary paths, so we stage a lean per-render
+ * public dir (image + the committed background.mp3), bundle against it, and the composition
+ * resolves both via staticFile().
  */
 const path = require("path");
 const fs = require("fs");
@@ -27,6 +28,80 @@ const SAMPLE_CAPTIONS = [
   "I respect them now. 🏔️",
 ];
 
+function compactStamp(d) {
+  const p = (n) => String(n).padStart(2, "0");
+  return (
+    `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}` +
+    `-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`
+  );
+}
+
+/**
+ * Render the ElderBarkShort composition to outputPath.
+ *   opts: { imagePath, captions, outputPath, preview? }
+ * Returns the outputPath.
+ */
+async function renderShort({imagePath, captions, outputPath, preview = false}) {
+  if (!imagePath) throw new Error("renderShort: imagePath is required");
+  if (!Array.isArray(captions) || !captions.length) throw new Error("renderShort: captions (non-empty array) is required");
+  if (!outputPath) throw new Error("renderShort: outputPath is required");
+
+  const imgAbs = path.isAbsolute(imagePath) ? imagePath : path.join(ROOT, imagePath);
+  if (!fs.existsSync(imgAbs)) throw new Error(`Image not found: ${imagePath}`);
+  if (!fs.existsSync(MUSIC_SRC)) {
+    throw new Error(`Music asset missing: ${path.relative(ROOT, MUSIC_SRC)} — commit a track there (Spec 4).`);
+  }
+
+  // Stage the lean public dir: image + music.
+  fs.rmSync(RENDER_PUBLIC, {recursive: true, force: true});
+  fs.mkdirSync(RENDER_PUBLIC, {recursive: true});
+  const ext = path.extname(imgAbs).toLowerCase() || ".png";
+  const imageRel = `image${ext}`;
+  fs.copyFileSync(imgAbs, path.join(RENDER_PUBLIC, imageRel));
+  fs.copyFileSync(MUSIC_SRC, path.join(RENDER_PUBLIC, "background.mp3"));
+
+  const inputProps = {imagePath: imageRel, captions};
+
+  const {bundle} = await import("@remotion/bundler");
+  const {selectComposition, renderMedia} = await import("@remotion/renderer");
+
+  try {
+    console.log("📦 Bundling Remotion project...");
+    const serveUrl = await bundle({entryPoint: ENTRY, publicDir: RENDER_PUBLIC});
+    const composition = await selectComposition({serveUrl, id: "ElderBarkShort", inputProps});
+
+    fs.mkdirSync(path.dirname(outputPath), {recursive: true});
+    const frameRange = preview ? [0, PREVIEW_FRAMES] : undefined;
+    console.log(
+      `🎥 Rendering ${preview ? `PREVIEW (frames 0-${PREVIEW_FRAMES})` : `${composition.durationInFrames} frames`}, ` +
+        `${composition.width}x${composition.height} -> ${path.relative(ROOT, outputPath)}`
+    );
+
+    let lastPct = -10;
+    await renderMedia({
+      composition,
+      serveUrl,
+      codec: "h264",
+      outputLocation: outputPath,
+      inputProps,
+      frameRange,
+      onProgress: ({progress}) => {
+        const pct = Math.round(progress * 100);
+        if (pct >= lastPct + 10) {
+          lastPct = pct;
+          process.stdout.write(`  ...${pct}%\n`);
+        }
+      },
+    });
+  } finally {
+    fs.rmSync(RENDER_PUBLIC, {recursive: true, force: true});
+  }
+  return outputPath;
+}
+
+module.exports = {renderShort};
+
+// --- CLI ---------------------------------------------------------------------
 function parseArgs(argv) {
   const out = {preview: false, props: null};
   for (let i = 0; i < argv.length; i += 1) {
@@ -36,15 +111,6 @@ function parseArgs(argv) {
   return out;
 }
 
-function compactStamp(d) {
-  const p = (n) => String(n).padStart(2, "0");
-  return (
-    `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}` +
-    `-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`
-  );
-}
-
-/** Most-recently-modified image in out/images (used as a fallback when no --props is given). */
 function latestImage() {
   const dir = path.join(ROOT, "out", "images");
   if (!fs.existsSync(dir)) return null;
@@ -80,73 +146,19 @@ function resolveProps(args) {
   return props;
 }
 
-async function main() {
-  const args = parseArgs(process.argv.slice(2));
-  const props = resolveProps(args);
-
-  const imgAbs = path.isAbsolute(props.imagePath) ? props.imagePath : path.join(ROOT, props.imagePath);
-  if (!fs.existsSync(imgAbs)) throw new Error(`Image not found: ${props.imagePath}`);
-  if (!fs.existsSync(MUSIC_SRC)) {
-    throw new Error(`Music asset missing: ${path.relative(ROOT, MUSIC_SRC)} — commit a track there (Spec 4).`);
-  }
-
-  // Stage the lean public dir: image + music.
-  fs.rmSync(RENDER_PUBLIC, {recursive: true, force: true});
-  fs.mkdirSync(RENDER_PUBLIC, {recursive: true});
-  const ext = path.extname(imgAbs).toLowerCase() || ".png";
-  const imageRel = `image${ext}`;
-  fs.copyFileSync(imgAbs, path.join(RENDER_PUBLIC, imageRel));
-  fs.copyFileSync(MUSIC_SRC, path.join(RENDER_PUBLIC, "background.mp3"));
-
-  const inputProps = {imagePath: imageRel, captions: props.captions};
-
-  const {bundle} = await import("@remotion/bundler");
-  const {selectComposition, renderMedia} = await import("@remotion/renderer");
-
-  console.log("📦 Bundling Remotion project...");
-  const serveUrl = await bundle({entryPoint: ENTRY, publicDir: RENDER_PUBLIC});
-
-  const composition = await selectComposition({serveUrl, id: "ElderBarkShort", inputProps});
-
-  const outDir = args.preview ? path.join(ROOT, "out") : path.join(ROOT, "out", "videos");
-  fs.mkdirSync(outDir, {recursive: true});
-  const outputLocation = args.preview
-    ? path.join(outDir, "preview.mp4")
-    : path.join(outDir, `${compactStamp(new Date())}.mp4`);
-  const frameRange = args.preview ? [0, PREVIEW_FRAMES] : undefined;
-
-  console.log(
-    `🎥 Rendering ${args.preview ? `PREVIEW (frames 0-${PREVIEW_FRAMES})` : `${composition.durationInFrames} frames`}, ` +
-      `${composition.width}x${composition.height} -> ${path.relative(ROOT, outputLocation)}`
-  );
-
-  let lastPct = -10;
-  await renderMedia({
-    composition,
-    serveUrl,
-    codec: "h264",
-    outputLocation,
-    inputProps,
-    frameRange,
-    onProgress: ({progress}) => {
-      const pct = Math.round(progress * 100);
-      if (pct >= lastPct + 10) {
-        lastPct = pct;
-        process.stdout.write(`  ...${pct}%\n`);
-      }
-    },
-  });
-
-  fs.rmSync(RENDER_PUBLIC, {recursive: true, force: true});
-  console.log(`✅ Rendered: ${path.relative(ROOT, outputLocation)}`);
+if (require.main === module) {
+  (async () => {
+    const args = parseArgs(process.argv.slice(2));
+    try {
+      const props = resolveProps(args);
+      const outputPath = args.preview
+        ? path.join(ROOT, "out", "preview.mp4")
+        : path.join(ROOT, "out", "videos", `${compactStamp(new Date())}.mp4`);
+      await renderShort({imagePath: props.imagePath, captions: props.captions, outputPath, preview: args.preview});
+      console.log(`✅ Rendered: ${path.relative(ROOT, outputPath)}`);
+    } catch (err) {
+      console.error(`❌ ${err.message}`);
+      process.exit(1);
+    }
+  })();
 }
-
-main().catch((err) => {
-  try {
-    fs.rmSync(RENDER_PUBLIC, {recursive: true, force: true});
-  } catch (_) {
-    /* ignore cleanup error */
-  }
-  console.error(`❌ ${err.message}`);
-  process.exit(1);
-});

@@ -8,7 +8,11 @@
     "preview": "node src/render.js --preview",
     "studio": "remotion studio src/index.ts",
     "generate:image": "node src/generate-image.js",
-    "generate:script": "node src/generate-script.js"
+    "generate:script": "node src/generate-script.js",
+    "pipeline": "node src/pipeline.js",
+    "auth:youtube": "node src/auth-youtube.js",
+    "publish": "node src/publish-video.js",
+    "reject": "node src/reject-video.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.2",
@@ -17,6 +21,7 @@
     "@remotion/renderer": "^4.0.0",
     "axios": "^1.7.0",
     "dotenv": "^16.4.0",
+    "googleapis": "^173.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "remotion": "^4.0.0",

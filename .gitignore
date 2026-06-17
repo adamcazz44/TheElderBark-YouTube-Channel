@@ -1,6 +1,9 @@
 node_modules/
 out/
 out/scripts/
+out/thumbnails/
+out/videos/
+out/images/
 .env
 *.mp4
 *.mp3
