@@ -6,9 +6,11 @@
   "scripts": {
     "render": "node scripts/render.mjs",
     "studio": "remotion studio src/index.ts",
-    "generate:image": "node src/generate-image.js"
+    "generate:image": "node src/generate-image.js",
+    "generate:script": "node src/generate-script.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.2",
     "@remotion/bundler": "^4.0.0",
     "@remotion/cli": "^4.0.0",
     "@remotion/renderer": "^4.0.0",
