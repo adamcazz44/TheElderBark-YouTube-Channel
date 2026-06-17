@@ -1,0 +1,24 @@
+{
+  "name": "the-elder-bark",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Elder Bark — senior-dog comedy YouTube Shorts pipeline. Photorealistic AI dog still + Ken Burns + animated captions + music, rendered to vertical 1080x1920 MP4 via Remotion.",
+  "scripts": {
+    "render": "node scripts/render.mjs",
+    "studio": "remotion studio src/index.ts"
+  },
+  "dependencies": {
+    "@remotion/bundler": "^4.0.0",
+    "@remotion/cli": "^4.0.0",
+    "@remotion/renderer": "^4.0.0",
+    "axios": "^1.7.0",
+    "dotenv": "^16.4.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.4.0"
+  }
+}
