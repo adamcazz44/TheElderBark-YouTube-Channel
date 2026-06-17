@@ -1,11 +1,46 @@
 {
-  "version": 1,
-  "lastUpdated": null,
-  "lastWinner": null,
-  "preferredOpeningStyle": "Short declarative statement, 3 words or fewer.",
-  "preferredCaptionCount": 5,
-  "emojiGuidance": "Maximum 1 emoji per caption. Use sparingly.",
-  "toneNotes": "Dry, grave seriousness about mundane problems. No puns.",
-  "highPerformingStones": [],
-  "analysisHistory": []
+  "version": 2,
+  "lastUpdated": "2026-06-17T22:38:05.777Z",
+  "lastWinner": "Oc16qiOGhl4",
+  "preferredOpeningStyle": "Immediate action statement revealing betrayal or conflict, under 7 words, no context-setting",
+  "preferredCaptionCount": 6,
+  "emojiGuidance": "Single emoji at emotional peak moment only; use to punctuate stance or rejection",
+  "toneNotes": "Sophisticated victim-to-strategist arc. Dog begins wronged, ends in control. Use relationship psychology vocabulary. Short sentences for power reveals.",
+  "highPerformingStones": [
+    3
+  ],
+  "analysisHistory": [
+    {
+      "winnerYoutubeId": "Oc16qiOGhl4",
+      "analyzedAt": "2026-06-17T22:38:05.777Z",
+      "outperformancePct": 73,
+      "steppingStone": 3,
+      "winningPatterns": [
+        {
+          "element": "opening_line_structure",
+          "observation": "Opens with immediate betrayal action ('She switched the bowl') without preamble. Creates instant narrative tension through a specific, relatable transgression that pet owners recognize.",
+          "instruction": "Start with a concrete action that reveals conflict in 5 words or less. Use subject-verb-object structure that implies relationship dynamics. Avoid setup—drop audience directly into the moment of discovery or violation."
+        },
+        {
+          "element": "power_dynamic_reversal",
+          "observation": "Captions 4-6 flip the script: dog appears to lose ('Eating it anyway') but reveals strategic control ('This is called leverage'). The dog reads human emotion ('I can smell the worry') and plans manipulation ('Tomorrow I'll eat more. She needs reassurance').",
+          "instruction": "Structure middle-to-end as apparent surrender followed by revelation of hidden control. Show the dog observing human emotional state, then deploying calculated response. Use short declarative sentences for the power reveal."
+        },
+        {
+          "element": "emotional_vocabulary_precision",
+          "observation": "Uses sophisticated relationship language: 'consultation', 'compromise', 'standards', 'leverage', 'reassurance'. Frames pet food as emotional negotiation, not sustenance. Single emoji (🚫) emphasizes rejection without cluttering.",
+          "instruction": "Deploy human relationship terminology to reframe mundane pet situations as complex emotional negotiations. Use 1 emoji maximum, placed at moment of peak emotional stance. Favor words like 'leverage', 'standards', 'consultation' that elevate the dog's agency."
+        }
+      ],
+      "styleGuideUpdate": {
+        "preferredOpeningStyle": "Immediate action statement revealing betrayal or conflict, under 7 words, no context-setting",
+        "preferredCaptionCount": 6,
+        "emojiGuidance": "Single emoji at emotional peak moment only; use to punctuate stance or rejection",
+        "toneNotes": "Sophisticated victim-to-strategist arc. Dog begins wronged, ends in control. Use relationship psychology vocabulary. Short sentences for power reveals.",
+        "highPerformingStones": [
+          3
+        ]
+      }
+    }
+  ]
 }
