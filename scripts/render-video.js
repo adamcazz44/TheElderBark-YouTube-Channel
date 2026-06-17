@@ -31,6 +31,13 @@ const RENDER_PUBLIC = path.join(ROOT, ".render-public"); // lean per-render publ
 const MIN_CLIPS = 5;
 const MIN_MATCHING = 3;
 
+// Target Short length (seconds). Viral *entertaining* Shorts cluster at ~28-33s and retention
+// drops off sharply past ~45s, so we treat the 10 generated captions as a POOL and render a
+// tight subset near TARGET, never exceeding MAX (keeps us in the high-retention band and safely
+// under YouTube's 60s Shorts boundary). Override per-run: TEB_TARGET_SECONDS / TEB_MAX_SECONDS.
+const TARGET_SECONDS = Number(process.env.TEB_TARGET_SECONDS) || 30;
+const MAX_SECONDS = Number(process.env.TEB_MAX_SECONDS) || 35;
+
 function fwd(p) {
   return p.replace(/\\/g, "/");
 }
@@ -110,6 +117,26 @@ function selectClips(allClips, theme) {
   return selected;
 }
 
+/**
+ * Trim the caption pool to a Short of ~target seconds without exceeding hardMax. Walks the
+ * captions in order, accumulating until close to target; skips any single caption that would
+ * blow the ceiling (a shorter later one may still fit). Always returns at least one caption.
+ */
+function selectPhrasesForTarget(allPhrases, target, hardMax) {
+  const picked = [];
+  let total = 0;
+  for (const p of allPhrases) {
+    const d = Number(p.screen_duration_seconds) || 0;
+    if (d <= 0) continue;
+    if (total + d > hardMax) continue; // would blow the ceiling — skip, try a shorter one
+    picked.push(p);
+    total += d;
+    if (total >= target) break; // close enough to target — stop
+  }
+  if (!picked.length && allPhrases.length) picked.push(allPhrases[0]); // never render empty
+  return picked;
+}
+
 function pickMusic() {
   if (!fs.existsSync(MUSIC_DIR)) return null;
   const tracks = fs
@@ -161,11 +188,13 @@ function main() {
     console.error(`❌ Quote file missing on disk: ${quoteEntry.file}`);
     process.exit(1);
   }
-  const phrases = readJson(quoteFileAbs).phrases || [];
-  if (!phrases.length) {
+  const allPhrases = readJson(quoteFileAbs).phrases || [];
+  if (!allPhrases.length) {
     console.error(`❌ Quote file has no phrases: ${quoteEntry.file}`);
     process.exit(1);
   }
+  // Trim the caption pool to a ~TARGET_SECONDS Short (viral entertaining retention band).
+  const phrases = selectPhrasesForTarget(allPhrases, TARGET_SECONDS, MAX_SECONDS);
 
   // --- footage ---
   if (!fs.existsSync(FOOTAGE_MANIFEST)) {
@@ -224,7 +253,7 @@ function main() {
     0
   );
 
-  console.log(`🎬 Rendering "${theme}" — ${phrases.length} phrases, ${clips.length} clips${musicFile ? ", with music" : ", silent"}...`);
+  console.log(`🎬 Rendering "${theme}" — ${phrases.length}/${allPhrases.length} captions (~${Math.round(videoSeconds)}s, target ${TARGET_SECONDS}s), ${clips.length} clips${musicFile ? ", with music" : ", silent"}...`);
 
   const res = spawnSync(
     "npx",
@@ -258,6 +287,8 @@ function main() {
     file: `output/${base}.mp4`,
     theme,
     quote_file: quoteEntry.file,
+    captions_used: phrases.length,
+    captions_pool: allPhrases.length,
     clips_used: clips.map((c) => c.id),
     music_used: musicAbs ? `music/${path.basename(musicAbs)}` : null,
     duration_seconds: videoSeconds,
