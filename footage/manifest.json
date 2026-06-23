@@ -1,1 +1,34 @@
-{"clips": []}
+{
+  "clips": [
+    {
+      "id": "coverr_V4Ev0V9B7R",
+      "keyword": "dog and owner",
+      "source": "coverr",
+      "file": "footage/coverr_V4Ev0V9B7R_dog_and_owner.mp4",
+      "width": 3840,
+      "height": 2160,
+      "duration": 22,
+      "downloaded_at": "2026-06-23T19:38:46.079Z"
+    },
+    {
+      "id": "coverr_duyz3Wt67M",
+      "keyword": "dog and owner",
+      "source": "coverr",
+      "file": "footage/coverr_duyz3Wt67M_dog_and_owner.mp4",
+      "width": 3840,
+      "height": 2160,
+      "duration": 25,
+      "downloaded_at": "2026-06-23T19:38:46.592Z"
+    },
+    {
+      "id": "coverr_hEuaWY0alh",
+      "keyword": "dog and owner",
+      "source": "coverr",
+      "file": "footage/coverr_hEuaWY0alh_dog_and_owner.mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration": 13,
+      "downloaded_at": "2026-06-23T19:38:49.929Z"
+    }
+  ]
+}
